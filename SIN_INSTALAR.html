@@ -1,0 +1,90 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Puente · Activar desde el navegador</title><style>
+:root{font-family:Segoe UI,Arial,sans-serif;color:#242631;background:#f6f6f5}*{box-sizing:border-box}body{max-width:850px;margin:auto;padding:34px 22px 60px}h1{font-size:34px;letter-spacing:-1px;margin-bottom:12px}h1 span{color:#ee1c26}h2{font-size:21px;margin:0 0 14px}p,li{font-size:14px;line-height:1.7}section{background:white;border:1px solid #e3e4e8;border-radius:16px;padding:26px;margin:22px 0}label{display:block;font-size:13px;margin:18px 0 8px;font-weight:600}input,textarea{font:13px Segoe UI,Arial,sans-serif;width:100%;border:1px solid #ccd0d9;padding:12px;border-radius:8px}textarea{resize:vertical}button,.button{display:inline-block;background:#ee1c26;color:white;border:0;border-radius:8px;padding:12px 16px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;margin:10px 8px 0 0}button:disabled{opacity:.5;cursor:default}small{display:block;color:#747985;font-size:12px;line-height:1.6;margin:12px 0}a{color:#c41822}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px Segoe UI,Arial,sans-serif;line-height:1.65}code{background:#f0f1f3;border-radius:4px;padding:2px 5px}summary{cursor:pointer;font-weight:600}#error{color:#a12528;min-height:1.5em}[hidden]{display:none!important}input:focus,button:focus,a:focus,textarea:focus{outline:3px solid #ee1c2670;outline-offset:3px}
+</style><h1><span>puente.</span> Sin instalar programas.</h1><p>Este paquete activa el servidor usando GitHub y Cloudflare desde el navegador. Tu página sigue alojada en Tiiny. Conserva el HTML de la app que ya recibiste.</p>
+<section><h2>1. Sube el servidor a GitHub</h2><p>Abre <a href="https://github.com/new" target="_blank" rel="noreferrer">GitHub</a> y crea un repositorio privado llamado <strong>puente-evento</strong>. En la página del repositorio, elige subir archivos. Arrastra todos los archivos de este ZIP ya extraído y guarda los cambios. <strong>Sube los archivos sueltos; no subas el ZIP.</strong></p><small>worker.mjs, wrangler.jsonc y package.json deben quedar directamente en la raíz del repositorio.</small></section>
+<section><h2>2. Publica desde Cloudflare</h2><p>En <a href="https://dash.cloudflare.com/" target="_blank" rel="noreferrer">Cloudflare</a>, abre Workers &amp; Pages → Create application → Import a repository. Conecta GitHub y selecciona el repositorio.</p><p>Nombre del Worker: <strong>puente-evento</strong>. Deja la raíz del proyecto predeterminada, el comando Build vacío y el comando Deploy como <code>npx wrangler deploy</code>. Cloudflare ejecuta ese comando. Pulsa Save and Deploy.</p><small>No ejecutes ACTIVAR_EN_WINDOWS.cmd para esta alternativa. Si ya tienes un Worker con ese nombre, consulta README.md antes de continuar.</small></section>
+<section><h2>3. Configura los tres secretos</h2><p>Dentro del Worker publicado, entra a Settings → Variables and Secrets → Add. Selecciona tipo <strong>Secret</strong> para cada uno y pulsa Deploy al guardar:</p><ul><li><strong>APP_ORIGINS:</strong> el origen de tu página de Tiiny, calculado abajo.</li><li><strong>ROOM_ACCESS_TOKEN:</strong> el código de sala que generes abajo.</li><li><strong>OPENAI_API_KEY:</strong> tu clave nueva de OpenAI. Introdúcela únicamente en el panel de Cloudflare.</li></ul>
+<label for="page">Enlace HTTPS de tu página en Tiiny</label><input id="page" type="url" placeholder="https://mi-evento.tiiny.site" autocomplete="off"><label for="origin">Valor para APP_ORIGINS</label><input id="origin" readonly><label for="room">Valor para ROOM_ACCESS_TOKEN</label><input id="room" autocomplete="off" spellcheck="false" placeholder="Genera un código, o pega el que ya configuraste"><button id="generate" type="button">Generar código de sala</button><button id="copy" type="button">Copiar código</button><small>Copia exactamente el mismo código en Cloudflare y en la app. Guárdalo antes de cerrar esta guía. No es una clave de OpenAI. Este archivo no guarda ni envía tus valores.</small></section>
+<section><h2>4. Abre tu sala</h2><label for="server">Dirección HTTPS del Worker publicado</label><input id="server" type="url" placeholder="https://puente-evento.tu-cuenta.workers.dev" autocomplete="off"><label for="link">Enlace completo de la sala</label><textarea id="link" rows="3" readonly></textarea><p id="error" role="status"></p><a id="open" class="button" target="_blank" rel="noreferrer" hidden>Abrir mi sala</a><small>El enlace contiene el código de invitación. Compártelo solo con las personas del evento. También puedes introducir la dirección del Worker y el código directamente en «Configurar conexión» de tu app.</small><p>Cuando aparezca <strong>Sala conectada</strong>, usa el botón de compartir de la app para generar el QR. En el celular: Hablar → Probar conexión sin micrófono. En la laptop: Ver traducción. Después detén la demo e inicia una prueba con voz real.</p></section>
+<section><details><summary>Guía completa, límites y referencias</summary><pre># Puente: servidor desde el navegador
+
+Este paquete complementa el HTML de Tiiny. No exige instalar Node.js en tu computadora: Cloudflare ejecuta las herramientas de publicación. Necesitas cuentas de GitHub y Cloudflare y una clave nueva de OpenAI con acceso y facturación para la API. El uso de los servicios puede generar costes.
+
+## 1. Sube estos archivos a GitHub
+
+Extrae el ZIP y abre https://github.com/new . Crea un repositorio privado llamado `puente-evento`. En su página, elige la opción para subir archivos (uploading an existing file o Add file &gt; Upload files). Arrastra el CONTENIDO de la carpeta extraída y guarda los cambios con Commit changes. Los archivos `wrangler.jsonc`, `worker.mjs` y `package.json` deben verse directamente en la raíz del repositorio; no subas el ZIP como un único archivo.
+
+Este paquete no contiene credenciales reales. No añadas tu clave de OpenAI al repositorio.
+
+## 2. Conecta Cloudflare
+
+En https://dash.cloudflare.com/ abre Workers &amp; Pages &gt; Create application &gt; Import a repository. Autoriza GitHub para acceder al repositorio `puente-evento` y selecciónalo.
+
+Configuración:
+- Nombre del Worker: `puente-evento` (debe coincidir con `name` en wrangler.jsonc).
+- Rama de producción: la principal de tu repositorio, normalmente `main`.
+- Root directory: la raíz del repositorio; deja el valor predeterminado.
+- Build command: vacío; el servidor no requiere una compilación previa.
+- Deploy command: `npx wrangler deploy`.
+
+Pulsa Save and Deploy. Los comandos se ejecutan en Cloudflare, no en tu computadora. La configuración incluida crea automáticamente el recurso de la sala compartida. Si falla, conserva el mensaje de error sin incluir claves y pide ayuda. Si ya existe un Worker tuyo llamado `puente-evento`, usa otro nombre y cambia también `name` en wrangler.jsonc antes de publicar.
+
+## 3. Añade tres secretos al Worker
+
+Cuando termine el primer despliegue, abre el Worker &gt; Settings &gt; Variables and Secrets &gt; Add. Añade estos TRES valores como tipo Secret, y guarda/publica los cambios:
+
+| Nombre exacto | Valor |
+| --- | --- |
+| APP_ORIGINS | El origen HTTPS de tu sitio Tiiny, por ejemplo https://mi-evento.tiiny.site, sin barra final ni ruta. |
+| ROOM_ACCESS_TOKEN | Un código aleatorio que generarás con SIN_INSTALAR.html. |
+| OPENAI_API_KEY | Tu clave NUEVA de OpenAI. Nunca la pegues en GitHub, en el HTML o en el chat. |
+
+Usa los secretos de ejecución del Worker, NO la sección de variables del proceso de Builds. Este archivo wrangler.jsonc no incluye vars para estos nombres; los secretos se conservan al volver a desplegar. Revoca la clave de OpenAI que compartiste antes en el chat.
+
+## 4. Conecta la página de Tiiny
+
+Copia la dirección pública del Worker que termina en workers.dev. En tu página de Tiiny, pulsa el icono de configuración. Introduce esa dirección HTTPS y el mismo código ROOM_ACCESS_TOKEN. Pulsa Guardar y conectar. Debe aparecer Sala conectada. Usa el botón de compartir para obtener el enlace completo y el único QR para el celular y la laptop.
+
+Para facilitarlo, SIN_INSTALAR.html permite generar el código y construir el enlace completo. Abre ese archivo en tu navegador desde la carpeta extraída. No necesita subirse a Tiiny y nunca solicita la clave de OpenAI.
+
+En el celular, elige Hablar &gt; Probar conexión sin micrófono; en la laptop, Ver traducción. Si ambos reciben las frases de ejemplo, detén esa prueba e inicia una prueba de voz real. La demo compartida no llama a OpenAI.
+
+## Estado
+
+El código del servidor es el mismo que superó la prueba de cuatro conexiones WebSocket locales. Este paquete se comprueba mediante un empaquetado local sin desplegarlo. El proceso de publicación desde GitHub debe completarse en tus cuentas; no se ha ejecutado por ti. La traducción con audio real sigue pendiente de configurar y probar tus equipos. El navegador del entorno no permitió la validación visual de la guía; no se presenta como probada en un navegador real.
+
+Mantén el teléfono desbloqueado y Chrome visible. La app no graba audio, pero lo envía a OpenAI para traducirlo. El servidor comparte subtítulos recientes; no archiva la conferencia. La exclusividad permite un micrófono a la vez, y cualquier invitado con el enlace puede tomarlo cuando esté libre.
+
+## Referencias
+
+- https://developers.cloudflare.com/workers/ci-cd/builds/
+- https://developers.cloudflare.com/workers/ci-cd/builds/configuration/
+- https://developers.cloudflare.com/workers/configuration/secrets/
+- https://docs.github.com/en/repositories/working-with-files/managing-files/adding-a-file-to-a-repository
+</pre></details></section><p><small>La publicación en tus cuentas y la prueba de audio real están pendientes. Puedes consultar el procedimiento de <a href="https://developers.cloudflare.com/workers/ci-cd/builds/" target="_blank" rel="noreferrer">Cloudflare Builds</a>.</small></p>
+<script>
+const $=id=>document.getElementById(id);
+function update(){
+ $('error').textContent='';$('origin').value='';$('link').value='';$('open').hidden=true;$('open').removeAttribute('href');
+ $('generate').disabled=!!$('room').value;
+ try{
+  if(!$('page').value.trim())return;
+  const page=new URL($('page').value.trim());
+  if(page.protocol!=='https:'||page.username||page.password)throw new Error('Usa el enlace HTTPS público de Tiiny.');
+  $('origin').value=page.origin;
+  if(!$('server').value.trim()||!$('room').value.trim())return;
+  const server=new URL($('server').value.trim()),room=$('room').value.trim();
+  if(server.protocol!=='https:'||server.username||server.password||server.search||server.hash||server.pathname!=='/')throw new Error('Usa la dirección HTTPS del Worker, sin rutas ni parámetros.');
+  if(!/^[A-Za-z0-9_-]{32,128}$/.test(room)||room.startsWith('sk-'))throw new Error('Usa el código de la sala, nunca la clave de OpenAI.');
+  page.search='';page.hash=new URLSearchParams({server:server.origin,room}).toString();
+  $('link').value=page.href;$('open').href=page.href;$('open').hidden=false;
+ }catch(e){$('error').textContent=e instanceof TypeError?'Revisa que las direcciones comiencen con https:// y estén completas.':e.message;}
+}
+$('generate').onclick=()=>{
+ if($('room').value)return;
+ try{const bytes=crypto.getRandomValues(new Uint8Array(32));$('room').value=btoa(String.fromCharCode(...bytes)).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');update();}
+ catch{$('error').textContent='El navegador no permitió generar el código. Prueba abrir esta guía en Chrome.';}
+};
+$('copy').onclick=async()=>{if(!$('room').value)return;try{await navigator.clipboard.writeText($('room').value);$('copy').textContent='Código copiado';}catch{$('room').focus();$('room').select();$('copy').textContent='Seleccionado: pulsa Ctrl+C';}};
+for(const id of ['page','server','room'])$(id).addEventListener('input',update);
+</script></html>

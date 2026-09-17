@@ -1,0 +1,25 @@
+{
+  "name": "puente-evento",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-05-01",
+  "workers_dev": true,
+  "observability": {
+    "enabled": false
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "EVENT_ROOM",
+        "class_name": "EventRoom"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "EventRoom"
+      ]
+    }
+  ]
+}
