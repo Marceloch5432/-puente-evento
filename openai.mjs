@@ -5,7 +5,7 @@ export async function mintAuthorization(key, signal, fetcher = fetch) {
   let response;
   try {
     response = await fetcher("https://api.openai.com/v1/realtime/translations/client_secrets", {
-      method: "POST", redirect: "error",
+      method: "POST", redirect: "manual"
       headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
       body: JSON.stringify({ expires_after: { anchor: "created_at", seconds: 120 },
         session: { model: "gpt-realtime-translate", audio: {
