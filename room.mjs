@@ -80,7 +80,7 @@ export class Room {
     if (type === "token") {
       if (this.mode !== "live") return this.reply(id, request, null, "La demo no usa OpenAI.");
       this.tokenTimes = this.tokenTimes.filter(t => now - t < 3600000);
-      if (owner.minting || (owner.lastMint && now - owner.lastMint < 20000) || this.tokenTimes.length >= 12)
+      if (owner.minting || (owner.lastMint && now - owner.lastMint < 20000) || this.tokenTimes.length >= 1200)
         return this.reply(id, request, null, "Espera unos segundos antes de iniciar otra conexión. La sala permite 12 autorizaciones por hora.");
       owner.minting = true; owner.lastMint = now; this.tokenTimes.push(now);
       const abort = new AbortController(); owner.abort = abort;
